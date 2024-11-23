@@ -1,9 +1,12 @@
 package main
 
 import (
-	"io/ioutil"
+	"encoding/json"
+	"fmt"
+	"io"
 	"net/http"
 	"net/url"
+	"strconv"
 )
 
 type BinanceConnector struct {
@@ -26,7 +29,7 @@ func (bc *BinanceConnector) doRequest(endpoint string, params url.Values) ([]byt
 	}
 	defer resp.Body.Close()
 
-	body, err := ioutil.ReadAll(resp.Body)
+	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return nil, err
 	}
@@ -40,4 +43,32 @@ func (bc *BinanceConnector) Ping() ([]byte, error) {
 
 func (bc *BinanceConnector) Time() ([]byte, error) {
 	return bc.doRequest("/api/v3/time", url.Values{})
+}
+
+func (bc *BinanceConnector) GetKlines(symbol, interval string, limit int) (Klines, error) {
+	params := url.Values{
+		"symbol":   []string{symbol},
+		"interval": []string{interval},
+		"limit":    []string{strconv.Itoa(limit)},
+	}
+	data, err := bc.doRequest("/api/v3/klines", params)
+	if err != nil {
+		return nil, err
+	}
+
+	var rawData [][]json.RawMessage
+	if err := json.Unmarshal(data, &rawData); err != nil {
+		return nil, fmt.Errorf("error decoding response: %w", err)
+	}
+
+	klines := make(Klines, len(rawData))
+	for i, raw := range rawData {
+		var kline Kline
+		if err := parseKline(raw, &kline); err != nil {
+			return nil, fmt.Errorf("error parsing kline at index %d: %w", i, err)
+		}
+		klines[i] = kline
+	}
+
+	return klines, nil
 }
