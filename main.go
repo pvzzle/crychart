@@ -1,8 +1,15 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+)
 
 func main() {
 	connector := NewBinanceConnector()
-	fmt.Println(connector.BaseURL)
+	resp, err := connector.Time()
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	fmt.Println(string(resp))
 }
