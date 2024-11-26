@@ -2,14 +2,17 @@ package main
 
 import (
 	"fmt"
+
+	"github.com/pvzzle/crychart/db"
 )
 
 func main() {
 	connector := NewBinanceConnector()
-	resp, err := connector.GetKlines("ETHBTC", "5m", 5)
+	_, err := connector.GetKlines("ETHBTC", "5m", 5)
 	if err != nil {
 		fmt.Println(err)
 	}
 
-	fmt.Println(resp)
+	mongoUri := "mongodb://localhost:27017"
+	db.ConnectDB(mongoUri)
 }
