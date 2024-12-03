@@ -2,18 +2,28 @@ package main
 
 import (
 	"context"
-	"fmt"
+
+	"github.com/pvzzle/crychart/internal/entity"
+	"github.com/pvzzle/crychart/internal/service"
+	"github.com/pvzzle/crychart/internal/service/providers/binance"
 
 	"github.com/pvzzle/crychart/mongo"
 	"go.mongodb.org/mongo-driver/bson"
 )
 
 func main() {
-	connector := NewBinanceConnector()
-	kls, err := connector.GetKlines("ETHBTC", "5m", 5)
-	if err != nil {
-		fmt.Println(err)
+	provider := binance.NewDefaultProvider()
+
+	klinesService := service.NewKlinesService(
+		provider,
+		nil,
+	)
+	klineOpts := entity.KlineOptions{
+		Symbol:   "ETHBTC",
+		Interval: "5m",
+		Limit:    5,
 	}
+	kls := klinesService.Fetch(klineOpts)
 
 	mongoUri := "mongodb://localhost:27017"
 	mongo.ConnectDB(mongoUri)
