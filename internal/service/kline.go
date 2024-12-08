@@ -9,7 +9,7 @@ type KlineProvider interface {
 }
 
 type KlineRepository interface {
-	// TODO: add methods
+	Insert(entity.Klines) error
 }
 
 type KlineService struct {
@@ -17,10 +17,10 @@ type KlineService struct {
 	repository KlineRepository
 }
 
-func NewKlinesService(klinesProvider KlineProvider, KlinesRepository KlineRepository) *KlineService {
+func NewKlineService(klineProvider KlineProvider, klineRepository KlineRepository) *KlineService {
 	return &KlineService{
-		provider:   klinesProvider,
-		repository: KlinesRepository,
+		provider:   klineProvider,
+		repository: klineRepository,
 	}
 }
 
@@ -30,4 +30,8 @@ func (ks *KlineService) Fetch(options entity.KlineOptions) entity.Klines {
 		return entity.Klines{}
 	}
 	return klines
+}
+
+func (ks *KlineService) Save(kls entity.Klines) {
+	ks.repository.Insert(kls)
 }

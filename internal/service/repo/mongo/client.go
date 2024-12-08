@@ -9,9 +9,7 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-var Client *mongo.Client
-
-func ConnectDB(uri string) {
+func ConnectDB(uri string) *mongo.Client {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
@@ -26,5 +24,5 @@ func ConnectDB(uri string) {
 	}
 
 	fmt.Println("connected to mongodb")
-	Client = client
+	return client
 }
